@@ -1,0 +1,30 @@
+.my-footer {
+    height: 5em;
+    background-color: #25418f;
+    margin-top: 1.5em;
+    padding: 1em;
+    font-size: 10px;
+}
+
+.room-image {
+    width: 50%;
+}
+
+.notie-container {
+    box-shadow: none;
+}
+
+.datepicker-dropdown {
+    padding-top: 90px;
+}
+
+.my-footer {
+    height: 5em;
+    background-color: #25418f;
+    margin-top: 1.5em;
+    padding: 1em;
+    font-size: 10px;
+}
+.room-image {
+    width: 50%;
+}
