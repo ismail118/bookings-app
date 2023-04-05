@@ -228,6 +228,16 @@
                 custom: custom,
             }
         }
+
+        {{with .Error}}
+        notify("{{.}}", 'error')
+        {{end}}
+        {{with .Success}}
+        notify("{{.}}", 'success')
+        {{end}}
+        {{with .Flash}}
+        notify("{{.}}", 'flash')
+        {{end}}
     </script>
     </body>
     </html>
