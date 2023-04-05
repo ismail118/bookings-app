@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ismail118/bookings-app/internal/config"
+	"github.com/ismail118/bookings-app/internal/forms"
 	"github.com/ismail118/bookings-app/internal/models"
 	"github.com/ismail118/bookings-app/internal/render"
 	"log"
@@ -104,7 +105,46 @@ func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, r, "contact.page.gohtml", &models.TemplateData{})
 }
 
-// Contact renders the contact page
-func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "make-reservation.page.gohtml", &models.TemplateData{})
+// Reservation renders the make reservation page
+func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
+	var emptyReservation models.Reservation
+	data := make(map[string]interface{})
+	data["reservation"] = emptyReservation
+
+	render.RenderTemplate(w, r, "make-reservation.page.gohtml", &models.TemplateData{
+		Form: forms.New(nil),
+		Data: data,
+	})
+}
+
+// PostReservation handles the posting reservation form
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	reservation := models.Reservation{
+		FirstName:   r.PostForm.Get("first_name"),
+		LastName:    r.PostForm.Get("last_name"),
+		Email:       r.PostForm.Get("email"),
+		PhoneNumber: r.PostForm.Get("phone_number"),
+	}
+
+	form := forms.New(r.PostForm)
+
+	form.Required("first_name", "last_name", "email", "phone_number")
+	form.MinLength("first_name", 3, r)
+	form.IsEmail("email")
+
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+		render.RenderTemplate(w, r, "make-reservation.page.gohtml", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
 }
