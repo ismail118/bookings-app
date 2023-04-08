@@ -20,4 +20,11 @@ func TestErrors_Get(t *testing.T) {
 	if e == "" {
 		t.Error("failed get")
 	}
+
+	errs = errors{}
+	e = errs.Get("e")
+
+	if e != "" {
+		t.Error("failed get")
+	}
 }
