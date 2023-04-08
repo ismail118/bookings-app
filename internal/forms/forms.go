@@ -42,7 +42,7 @@ func (f *Form) Required(fields ...string) {
 
 // Has validate given field
 func (f *Form) Has(field string, r *http.Request) bool {
-	x := r.Form.Get(field)
+	x := f.Data.Get(field)
 	if x == "" {
 		f.Errors.Add(field, "This field cannot be blank")
 		return false
@@ -53,7 +53,7 @@ func (f *Form) Has(field string, r *http.Request) bool {
 
 // MinLength check min length for given fields
 func (f *Form) MinLength(field string, minLength int, r *http.Request) bool {
-	x := r.Form.Get(field)
+	x := f.Data.Get(field)
 	if len(x) < minLength {
 		f.Errors.Add(field, fmt.Sprintf("Minimal %d character for this field", minLength))
 		return false

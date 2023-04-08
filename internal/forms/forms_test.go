@@ -51,25 +51,19 @@ func TestForm_Has(t *testing.T) {
 
 	formData := url.Values{}
 	formData.Add("a", "a")
-	r.Form = formData
 
-	f := New(r.Form)
+	f := New(formData)
 
-	f.Has("a", r)
-
-	isValid := f.Valid()
-	if !isValid {
+	has := f.Has("a", r)
+	if !has {
 		t.Error("got invalid when should valid")
 	}
 
-	r = httptest.NewRequest(http.MethodPost, "/whatever", nil)
+	formData = url.Values{}
+	f = New(formData)
 
-	f = New(r.Form)
-
-	f.Has("a", r)
-
-	isValid = f.Valid()
-	if isValid {
+	has = f.Has("a", r)
+	if has {
 		t.Error("got valid when should invalid")
 	}
 }
@@ -79,24 +73,18 @@ func TestForm_MinLength(t *testing.T) {
 
 	formData := url.Values{}
 	formData.Add("a", "a")
-	r.Form = formData
 
-	f := New(r.Form)
+	f := New(formData)
 
-	f.MinLength("a", 1, r)
-
-	isValid := f.Valid()
+	isValid := f.MinLength("a", 1, r)
 	if !isValid {
 		t.Error("got invalid when should valid")
 	}
 
-	r = httptest.NewRequest(http.MethodPost, "/whatever", nil)
+	formData = url.Values{}
+	f = New(formData)
 
-	f = New(r.Form)
-
-	f.MinLength("a", 1, r)
-
-	isValid = f.Valid()
+	isValid = f.MinLength("a", 1, r)
 	if isValid {
 		t.Error("got valid when should invalid")
 	}
