@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"github.com/ismail118/bookings-app/helpers"
 	"github.com/ismail118/bookings-app/internal/config"
+	"github.com/ismail118/bookings-app/internal/driver"
 	"github.com/ismail118/bookings-app/internal/forms"
 	"github.com/ismail118/bookings-app/internal/models"
 	"github.com/ismail118/bookings-app/internal/render"
+	"github.com/ismail118/bookings-app/internal/repository"
+	"github.com/ismail118/bookings-app/internal/repository/dbrepo"
 	"net/http"
 )
 
@@ -17,12 +20,14 @@ var Repo *Repository
 // Repository is the repository type
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // NewRepo creates a new repository
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
