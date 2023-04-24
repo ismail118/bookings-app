@@ -83,7 +83,6 @@
     {{end}}
 
     <script>
-        let attention = Prompt();
         // Example starter JavaScript for disabling form submissions if there are invalid fields
         (function() {
             'use strict'
@@ -228,6 +227,8 @@
                 custom: custom,
             }
         }
+
+        let attention = Prompt();
 
         {{with .Error}}
         notify("{{.}}", 'error')

@@ -117,9 +117,20 @@ type jsonResponse struct {
 
 // PostAvailabilityJSON handle renders for availability and send JSON response
 func (m *Repository) PostAvailabilityJSON(w http.ResponseWriter, r *http.Request) {
+	sd := r.Form.Get("start")
+	ed := r.Form.Get("end")
+	layout := "2006-01-02"
+	startDate, _ := time.Parse(layout, sd)
+
+	endDate, _ := time.Parse(layout, ed)
+
+	roomID, _ := strconv.Atoi(r.Form.Get("room_id"))
+
+	available, _ := m.DB.SearchAvailabilityByRoomID(roomID, startDate, endDate)
+
 	res := jsonResponse{
-		Ok:      true,
-		Message: "Available!",
+		Ok:      available,
+		Message: "",
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -161,6 +172,8 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	res.Room.RoomName = room.RoomName
 	data["reservation"] = res
 
+	m.App.Session.Put(r.Context(), "reservation", res)
+
 	render.Template(w, r, "make-reservation.page.gohtml", &models.TemplateData{
 		Form:      forms.New(nil),
 		Data:      data,
@@ -170,45 +183,22 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 
 // PostReservation handles the posting reservation form
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		helpers.ServerError(w, errors.New("can't get reservation from session"))
+		return
+	}
+
 	err := r.ParseForm()
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
 
-	sd := r.Form.Get("start_date")
-	ed := r.Form.Get("end_date")
-
-	layout := "2006-01-02"
-
-	startDate, err := time.Parse(layout, sd)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-	endDate, err := time.Parse(layout, ed)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	ri := r.Form.Get("room_id")
-
-	roomID, err := strconv.Atoi(ri)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	reservation := models.Reservation{
-		FirstName:   r.PostForm.Get("first_name"),
-		LastName:    r.PostForm.Get("last_name"),
-		Email:       r.PostForm.Get("email"),
-		PhoneNumber: r.PostForm.Get("phone_number"),
-		StartDate:   startDate,
-		EndDate:     endDate,
-		RoomID:      roomID,
-	}
+	reservation.FirstName = r.PostForm.Get("first_name")
+	reservation.LastName = r.PostForm.Get("last_name")
+	reservation.Email = r.PostForm.Get("email")
+	reservation.PhoneNumber = r.PostForm.Get("phone_number")
 
 	form := forms.New(r.PostForm)
 
@@ -233,9 +223,9 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	restriction := models.RoomRestriction{
-		StartDate:     startDate,
-		EndDate:       endDate,
-		RoomID:        roomID,
+		StartDate:     reservation.StartDate,
+		EndDate:       reservation.EndDate,
+		RoomID:        reservation.RoomID,
 		ReservationID: newReservationID,
 		RestrictionID: 1,
 	}
@@ -262,11 +252,19 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 	}
 	m.App.Session.Remove(r.Context(), "reservation")
 
+	layout := "2006-01-02"
+	sd := reservation.StartDate.Format(layout)
+	ed := reservation.EndDate.Format(layout)
+	stringMap := make(map[string]string)
+	stringMap["start_date"] = sd
+	stringMap["end_date"] = ed
+
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
 
 	render.Template(w, r, "reservation-summary.page.gohtml", &models.TemplateData{
-		Data: data,
+		Data:      data,
+		StringMap: stringMap,
 	})
 }
 
