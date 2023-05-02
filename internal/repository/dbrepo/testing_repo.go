@@ -23,11 +23,23 @@ func (m *testDBRepo) InsertReservation(res models.Reservation) (int, error) {
 }
 
 func (m *testDBRepo) SearchAvailabilityByRoomID(roomID int, start, end time.Time) (bool, error) {
+	if roomID > 2 {
+		return false, errors.New("some error")
+	}
 	return false, nil
 }
 
 func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error) {
 	rooms := make([]models.Room, 0)
+
+	if start.Format("2006-01-02") == "2050-01-01" {
+		rooms = make([]models.Room, 1)
+		return rooms, nil
+	}
+	if start.Format("2006-01-02") == "2050-01-02" {
+		rooms = make([]models.Room, 1)
+		return rooms, errors.New("some error")
+	}
 	return rooms, nil
 }
 
