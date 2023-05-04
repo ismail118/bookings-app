@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi"
 	"github.com/ismail118/bookings-app/internal/config"
 	"github.com/ismail118/bookings-app/internal/driver"
 	"github.com/ismail118/bookings-app/internal/forms"
@@ -12,6 +11,7 @@ import (
 	"github.com/ismail118/bookings-app/internal/repository/dbrepo"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -357,7 +357,8 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 }
 
 func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
-	roomID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	exploded := strings.Split(r.RequestURI, "/")
+	roomID, err := strconv.Atoi(exploded[2])
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "invalid room id")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)

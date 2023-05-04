@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi"
 	"github.com/ismail118/bookings-app/internal/models"
 	"log"
 	"net/http"
@@ -516,41 +515,47 @@ func TestRepository_ReservationSummary(t *testing.T) {
 }
 
 func TestRepository_ChooseRoom(t *testing.T) {
-	m := chi.NewRouter()
-	m.Get("/choose-room/{id}", Repo.ChooseRoom)
-
-	req, _ := http.NewRequest("GET", "/choose-room/1", nil)
+	uri := "/choose-room/1"
+	req, _ := http.NewRequest("GET", uri, nil)
+	req.RequestURI = uri
 	ctx := getCtx(req)
 	req = req.WithContext(ctx)
 	session.Put(ctx, "reservation", models.Reservation{})
 
 	rr := httptest.NewRecorder()
-	m.ServeHTTP(rr, req)
+	handler := http.HandlerFunc(Repo.ChooseRoom)
+	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusSeeOther {
 		t.Errorf("Reservation handler return wrong response code: got %d, wanted %d", rr.Code, http.StatusSeeOther)
 	}
 
 	// test invalid room id
-	req, _ = http.NewRequest("GET", "/choose-room/invalid", nil)
+	uri = "/choose-room/invalid"
+	req, _ = http.NewRequest("GET", uri, nil)
+	req.RequestURI = uri
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 	session.Put(ctx, "reservation", models.Reservation{})
 
 	rr = httptest.NewRecorder()
-	m.ServeHTTP(rr, req)
+	handler = http.HandlerFunc(Repo.ChooseRoom)
+	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusTemporaryRedirect {
 		t.Errorf("Reservation handler return wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
 	}
 
 	// test missing reservation session
-	req, _ = http.NewRequest("GET", "/choose-room/1", nil)
+	uri = "/choose-room/1"
+	req, _ = http.NewRequest("GET", uri, nil)
+	req.RequestURI = uri
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
 	rr = httptest.NewRecorder()
-	m.ServeHTTP(rr, req)
+	handler = http.HandlerFunc(Repo.ChooseRoom)
+	handler.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusTemporaryRedirect {
 		t.Errorf("Reservation handler return wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
