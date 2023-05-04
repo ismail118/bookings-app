@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -109,17 +110,26 @@ func TestRepository_Reservation(t *testing.T) {
 }
 
 func TestRepository_PostReservation(t *testing.T) {
-	reqBody := fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-02",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=1",
-	)
+	//reqBody := fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-02",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=1",
+	//)
 
-	req, _ := http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	reqBody := url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "1")
+
+	req, _ := http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx := getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -151,17 +161,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid start date
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=00-00-00",
-		"end_date=2050-01-02",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=1",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=00-00-00",
+	//	"end_date=2050-01-02",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=1",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "00-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "1")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -177,17 +195,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid end date
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=00-00-00",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=1",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=00-00-00",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=1",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "00-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "1")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -203,17 +229,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid room id
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-01",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=invalid",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-01",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=invalid",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "invalid")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -229,17 +263,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for not found room
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-01",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=3",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-01",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=3",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "3")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -255,17 +297,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid data
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-01",
-		"first_name=i",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=1",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-01",
+	//	"first_name=i",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=1",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "i")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "1")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -281,17 +331,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for fail insert reservation
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-01",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=2",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-01",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=2",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "2")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
@@ -307,17 +365,25 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for fail insert restriction
-	reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
-		"start_date=2050-01-01",
-		"end_date=2050-01-01",
-		"first_name=ismail",
-		"last_name=alfiyasin",
-		"email=contoh@gmail.com",
-		"phone_number=021111111",
-		"room_id=0",
-	)
+	//reqBody = fmt.Sprintf("&%v&%v&%v&%v&%v&%v&%v",
+	//	"start_date=2050-01-01",
+	//	"end_date=2050-01-01",
+	//	"first_name=ismail",
+	//	"last_name=alfiyasin",
+	//	"email=contoh@gmail.com",
+	//	"phone_number=021111111",
+	//	"room_id=0",
+	//)
+	reqBody = url.Values{}
+	reqBody.Add("start_date", "2050-01-01")
+	reqBody.Add("end_date", "2050-01-02")
+	reqBody.Add("first_name", "ismail")
+	reqBody.Add("last_name", "alfiyasin")
+	reqBody.Add("email", "alfiyasin@gmail.com")
+	reqBody.Add("phone_number", "555-555-555")
+	reqBody.Add("room_id", "0")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody.Encode()))
 	ctx = getCtx(req)
 	req = req.WithContext(ctx)
 
