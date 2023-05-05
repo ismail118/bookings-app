@@ -70,7 +70,7 @@ func (m *postgresDBRepo) SearchAvailabilityByRoomID(roomID int, start, end time.
 
 	var numRow int
 
-	query := `select count(id) from room_restrictions where room_id = $1 and $2 < end_date and $3 > start_date;`
+	query := `select count(id) from room_restrictions where room_id = $1 and $2 <= end_date and $3 >= start_date;`
 
 	row := m.DB.QueryRowContext(ctx, query, roomID, start, end)
 	err := row.Scan(&numRow)
@@ -97,7 +97,7 @@ from
     rooms r
 where
     r.id not in
-    (select rr.room_id from room_restrictions rr where $1 < rr.end_date and $2 > rr.start_date)`
+    (select rr.room_id from room_restrictions rr where $1 <= rr.end_date and $2 >= rr.start_date)`
 
 	rooms := make([]models.Room, 0)
 	rows, err := m.DB.QueryContext(ctx, query, start, end)

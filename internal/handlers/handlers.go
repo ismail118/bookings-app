@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ismail118/bookings-app/internal/config"
 	"github.com/ismail118/bookings-app/internal/driver"
 	"github.com/ismail118/bookings-app/internal/forms"
@@ -324,6 +325,38 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
+
+	htmlMessage := fmt.Sprintf(`
+	<strong>Reservation Confirmation</strong><br>
+	Dear %s <br>
+	This is confirm your reservation from %s to %s.
+
+`, reservation.FirstName, sd, ed)
+
+	// send email notification
+	msg := models.MailData{
+		To:       reservation.Email,
+		From:     "me@here.com",
+		Subject:  "Reservation Confirmation",
+		Content:  htmlMessage,
+		Template: "basic.html",
+	}
+
+	m.App.MailChan <- msg
+
+	htmlMessage = fmt.Sprintf(`
+	Dear Owner <br>
+	You got new reservation from %s to %s.<br>
+`, sd, ed)
+	msg = models.MailData{
+		To:       "owner@gmail.com",
+		From:     "me@here.com",
+		Subject:  "Reservation Coming Alert",
+		Content:  htmlMessage,
+		Template: "basic.html",
+	}
+
+	m.App.MailChan <- msg
 
 	m.App.Session.Put(r.Context(), "reservation", reservation)
 
