@@ -455,3 +455,186 @@ func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/make-reservation", http.StatusTemporaryRedirect)
 }
+
+func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "login.page.gohtml", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context())
+
+	err := r.ParseForm()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't parse form")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	form := forms.New(r.PostForm)
+	form.IsEmail("email")
+	form.Required("email", "password")
+	if !form.Valid() {
+		render.Template(w, r, "login.page.gohtml", &models.TemplateData{
+			Form: form,
+		})
+		return
+	}
+
+	id, _, err := m.DB.Authenticate(email, password)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Success Login")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+
+func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-dashboard.page.gohtml", &models.TemplateData{})
+}
+
+func (m *Repository) NewAdminReservations(w http.ResponseWriter, r *http.Request) {
+	reservations, err := m.DB.NewReservations()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't get all reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+
+	render.Template(w, r, "admin-new-reservations.page.gohtml", &models.TemplateData{
+		Data: data,
+	})
+}
+
+func (m *Repository) NewAdminAllReservations(w http.ResponseWriter, r *http.Request) {
+	reservations, err := m.DB.AllReservations()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't get all reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+
+	render.Template(w, r, "admin-all-reservations.page.gohtml", &models.TemplateData{
+		Data: data,
+	})
+}
+
+func (m *Repository) NewAdminReservationsCalendars(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-reservations-calendars.page.gohtml", &models.TemplateData{})
+}
+
+func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
+	exploded := strings.Split(r.RequestURI, "/")
+	reservationId, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't parse to int")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	src := exploded[3]
+
+	err = m.DB.UpdateProcessedForReservation(reservationId, 1)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't update reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Reservation marked as processed")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
+func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request) {
+	exploded := strings.Split(r.RequestURI, "/")
+	reservationId, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't parse to int")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	src := exploded[3]
+
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	reservation, err := m.DB.GetReservationByID(reservationId)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't get reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["reservation"] = reservation
+	render.Template(w, r, "admin-reservation-show.page.gohtml", &models.TemplateData{
+		Data:      data,
+		StringMap: stringMap,
+		Form:      forms.New(nil),
+	})
+}
+
+func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't parse form")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	exploded := strings.Split(r.RequestURI, "/")
+	reservationId, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't parse to int")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	src := exploded[3]
+
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	reservation, err := m.DB.GetReservationByID(reservationId)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't get reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	reservation.FirstName = r.Form.Get("first_name")
+	reservation.LastName = r.Form.Get("last_name")
+	reservation.Email = r.Form.Get("email")
+	reservation.PhoneNumber = r.Form.Get("phone_number")
+
+	err = m.DB.UpdateReservation(reservation)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "can't get reservation")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusTemporaryRedirect)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Changes Save")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}

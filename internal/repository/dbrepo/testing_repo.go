@@ -50,3 +50,41 @@ func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
 	}
 	return room, nil
 }
+
+func (m *testDBRepo) GetUserByID(id int) (models.User, error) {
+	var u models.User
+	return u, nil
+}
+
+func (m *testDBRepo) UpdateUser(u models.User) error {
+	return nil
+}
+
+func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	return 1, "", nil
+}
+
+func (m *testDBRepo) AllReservations() ([]models.Reservation, error) {
+	return nil, nil
+}
+
+func (m *testDBRepo) NewReservations() ([]models.Reservation, error) {
+	return nil, nil
+}
+
+func (m *testDBRepo) GetReservationByID(id int) (models.Reservation, error) {
+	var res models.Reservation
+
+	return res, nil
+}
+func (m *testDBRepo) UpdateReservation(u models.Reservation) error {
+	return nil
+}
+
+func (m *testDBRepo) DeleteReservation(id int) error {
+	return nil
+}
+
+func (m *testDBRepo) UpdateProcessedForReservation(id, processed int) error {
+	return nil
+}

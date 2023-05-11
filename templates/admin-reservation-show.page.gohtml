@@ -1,0 +1,78 @@
+{{template "admin" .}}
+
+{{define "page-title"}}
+    Reservation
+{{end}}
+
+{{define "content"}}
+    {{$res := index .Data "reservation"}}
+    {{$src := index .StringMap "src"}}
+    <div class="col-md-12">
+
+        <p>
+            <strong>Arrival:</strong> {{humanDate $res.StartDate}}<br>
+            <strong>Departure:</strong> {{humanDate $res.StartDate}}<br>
+            <strong>Room:</strong> {{$res.Room.RoomName}}<br>
+        </p>
+        <form method="post" action="/admin/reservations/{{$src}}/{{$res.ID}}" class="needs-validation-disable" novalidate>
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+            <div class="form-group mt-5">
+                <label for="first_name">First Name:</label>
+                {{with .Form.Errors.Get "first_name"}}
+                    <label class="text-danger">{{.}}</label>
+                {{end}}
+                <input type="text" name="first_name" id="first_name"
+                       class="form-control {{with .Form.Errors.Get "first_name"}} is-invalid {{end}}"
+                       value="{{$res.FirstName}}" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                {{with .Form.Errors.Get "last_name"}}
+                    <label class="text-danger">{{.}}</label>
+                {{end}}
+                <input type="text" name="last_name" id="last_name"
+                       class="form-control {{with .Form.Errors.Get "last_name"}} is-invalid {{end}}"
+                       value="{{$res.LastName}}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                {{with .Form.Errors.Get "email"}}
+                    <label class="text-danger">{{.}}</label>
+                {{end}}
+                <input type="email" name="email" id="email"
+                       class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
+                       value="{{$res.Email}}" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                {{with .Form.Errors.Get "phone_number"}}
+                    <label class="text-danger">{{.}}</label>
+                {{end}}
+                <input type="text" name="phone_number" id="phone_number"
+                       class="form-control {{with .Form.Errors.Get "phone_number"}} is-invalid {{end}}"
+                       value="{{$res.PhoneNumber}}" required>
+            </div>
+            <br>
+            <input type="submit" class="btn btn-primary" value="Save">
+            <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cancel</a>
+            <a href="#!" class="btn btn-info" onclick="processRes({{$res.ID}}, {{$src}})">Mark As Processed</a>
+        </form>
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+        function processRes(id, src) {
+            attention.custom({
+                icon: 'warning',
+                msg: 'Are you sure?',
+                callback: function (result) {
+                    if (result !== false) {
+                        window.location.href = "/admin/process-reservation/"+src+"/"+id
+                    }
+                }
+            })
+        }
+    </script>
+{{end}}
