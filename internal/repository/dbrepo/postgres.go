@@ -106,6 +106,7 @@ where
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var room models.Room
@@ -407,6 +408,109 @@ func (m *postgresDBRepo) UpdateProcessedForReservation(id, processed int) error 
 	query := `update reservations set processed = $1 where id = $2`
 
 	_, err := m.DB.ExecContext(ctx, query, processed, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var rooms []models.Room
+
+	query := `select id, room_name, created_at, updated_at from rooms`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return rooms, nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r models.Room
+		err = rows.Scan(
+			&r.ID,
+			&r.RoomName,
+			&r.CreatedAt,
+			&r.UpdatedAt,
+		)
+		if err != nil {
+			return rooms, err
+		}
+
+		rooms = append(rooms, r)
+	}
+
+	return rooms, nil
+}
+
+func (m *postgresDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var roomRestrictions []models.RoomRestriction
+
+	query := `select id, start_date, end_date, room_id, coalesce(reservation_id, 0), restriction_id, created_at, updated_at 
+	from room_restrictions where $1 <= end_date and $2 >= start_date and room_id = $3`
+
+	rows, err := m.DB.QueryContext(ctx, query, start, end, roomID)
+	if err != nil {
+		return roomRestrictions, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r models.RoomRestriction
+		err = rows.Scan(
+			&r.ID,
+			&r.StartDate,
+			&r.EndDate,
+			&r.RoomID,
+			&r.ReservationID,
+			&r.RestrictionID,
+			&r.CreatedAt,
+			&r.UpdatedAt,
+		)
+		if err != nil {
+			return roomRestrictions, err
+		}
+
+		err = rows.Err()
+		if err != nil {
+			return roomRestrictions, err
+		}
+
+		roomRestrictions = append(roomRestrictions, r)
+	}
+
+	return roomRestrictions, nil
+}
+
+func (m *postgresDBRepo) InsertBlockForRoom(id int, startDate time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `insert into room_restrictions (start_date, end_date, room_id, restriction_id, created_at, updated_at) 
+values ($1, $2, $3, $4, $5, $6)`
+
+	_, err := m.DB.ExecContext(ctx, query, startDate, startDate.AddDate(0, 0, 1), id, 2, time.Now(), time.Now())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *postgresDBRepo) DeleteBlockByID(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `delete from room_restrictions where id = $1`
+
+	_, err := m.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}

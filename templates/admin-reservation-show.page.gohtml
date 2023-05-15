@@ -7,6 +7,8 @@
 {{define "content"}}
     {{$res := index .Data "reservation"}}
     {{$src := index .StringMap "src"}}
+    {{$year := index .StringMap "year"}}
+    {{$month := index .StringMap "month"}}
     <div class="col-md-12">
 
         <p>
@@ -16,6 +18,8 @@
         </p>
         <form method="post" action="/admin/reservations/{{$src}}/{{$res.ID}}" class="needs-validation-disable" novalidate>
             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <input type="hidden" name="year" value="{{index .StringMap "year"}}">
+            <input type="hidden" name="month" value="{{index .StringMap "month"}}">
 
             <div class="form-group mt-5">
                 <label for="first_name">First Name:</label>
@@ -54,22 +58,45 @@
                        value="{{$res.PhoneNumber}}" required>
             </div>
             <br>
-            <input type="submit" class="btn btn-primary" value="Save">
-            <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cancel</a>
-            <a href="#!" class="btn btn-info" onclick="processRes({{$res.ID}}, {{$src}})">Mark As Processed</a>
+            <div class="float-start">
+                <input type="submit" class="btn btn-primary" value="Save">
+                {{if eq $src "cal"}}
+                    <a href="#!" onclick="window.history.go(-1)" class="btn btn-warning">Cancel</a>
+                {{else}}
+                    <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cancel</a>
+                {{end}}
+                {{if eq $res.Processed 0}}
+                    <a href="#!" class="btn btn-info" onclick="processRes({{$res.ID}}, {{$src}}, {{$year}}, {{$month}})">Mark As Processed</a>
+                {{end}}
+            </div>
+            <div class="float-end">
+                <a href="#!" class="btn btn-danger" onclick="deleteRes({{$res.ID}}, {{$src}}, {{$year}}, {{$month}})">Delete</a>
+            </div>
+            <div class="clearfix"></div>
         </form>
     </div>
 {{end}}
 
 {{define "js"}}
     <script>
-        function processRes(id, src) {
+        function processRes(id, src, year, month) {
             attention.custom({
                 icon: 'warning',
                 msg: 'Are you sure?',
                 callback: function (result) {
                     if (result !== false) {
-                        window.location.href = "/admin/process-reservation/"+src+"/"+id
+                        window.location.href = "/admin/process-reservation/"+src+"/"+id+"/do?y="+year+"&m="+month
+                    }
+                }
+            })
+        }
+        function deleteRes(id, src, year, month) {
+            attention.custom({
+                icon: 'warning',
+                msg: 'Are you sure?',
+                callback: function (result) {
+                    if (result !== false) {
+                        window.location.href = "/admin/delete-reservation/"+src+"/"+id+"/do?y="+year+"&m="+month
                     }
                 }
             })

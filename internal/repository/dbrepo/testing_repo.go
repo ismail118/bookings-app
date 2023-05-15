@@ -61,15 +61,20 @@ func (m *testDBRepo) UpdateUser(u models.User) error {
 }
 
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	if email == "ismail@here.com" {
+		return 0, "", errors.New("some error")
+	}
 	return 1, "", nil
 }
 
 func (m *testDBRepo) AllReservations() ([]models.Reservation, error) {
-	return nil, nil
+	var r []models.Reservation
+	return r, nil
 }
 
 func (m *testDBRepo) NewReservations() ([]models.Reservation, error) {
-	return nil, nil
+	var r []models.Reservation
+	return r, nil
 }
 
 func (m *testDBRepo) GetReservationByID(id int) (models.Reservation, error) {
@@ -86,5 +91,41 @@ func (m *testDBRepo) DeleteReservation(id int) error {
 }
 
 func (m *testDBRepo) UpdateProcessedForReservation(id, processed int) error {
+	return nil
+}
+
+func (m *testDBRepo) AllRooms() ([]models.Room, error) {
+	var rooms []models.Room
+	rooms = append(rooms, models.Room{
+		ID:        1,
+		RoomName:  "room test",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	return rooms, nil
+}
+
+func (m *testDBRepo) GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+	if start.Format("2006-01-02") == "2050-05-01" {
+		return []models.RoomRestriction{
+			{
+				ID:            1,
+				StartDate:     start,
+				EndDate:       start.AddDate(0, 0, 1),
+				RoomID:        roomID,
+				RestrictionID: 2,
+				CreatedAt:     time.Now(),
+				UpdatedAt:     time.Now(),
+			},
+		}, nil
+	}
+	return []models.RoomRestriction{}, nil
+}
+
+func (m *testDBRepo) InsertBlockForRoom(id int, startDate time.Time) error {
+	return nil
+}
+
+func (m *testDBRepo) DeleteBlockByID(id int) error {
 	return nil
 }
