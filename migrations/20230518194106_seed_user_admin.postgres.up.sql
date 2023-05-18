@@ -1,0 +1,2 @@
+insert into users (first_name, last_name, email, password, access_level, created_at, updated_at)
+values ('admin', 'adm', 'adm@adm.com', '$2a$04$16J8kEWMrPimMmOTApE0x.usuhFiRrQ12DMYU4eRmCwaxC/GwgFb6', 1, '2023-04-24 19:46:10.000000', '2023-04-24 19:46:13.000000');
