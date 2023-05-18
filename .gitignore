@@ -2,3 +2,4 @@
 bookings-app
 database.yml
 .DS_Store
+coverage.out
